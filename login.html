@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <title>Iniciar Sesión</title>
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <style>
+            .login-wrapper {
+                min-height: calc(100vh - 140px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #f8f9fa;
+                padding: 2rem 1rem;
+            }
+            .login-card {
+                width: 100%;
+                max-width: 440px;
+                background: #fff;
+                border-radius: 1rem;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+                padding: 2.5rem 2rem;
+            }
+            .login-card .brand-icon {
+                font-size: 2.8rem;
+                color: #212529;
+            }
+            .tab-btn {
+                border: none;
+                background: none;
+                padding: 0.5rem 1.5rem;
+                font-weight: 600;
+                color: #6c757d;
+                border-bottom: 3px solid transparent;
+                transition: all 0.2s;
+                cursor: pointer;
+            }
+            .tab-btn.active {
+                color: #212529;
+                border-bottom-color: #212529;
+            }
+            .form-control:focus {
+                border-color: #212529;
+                box-shadow: 0 0 0 0.2rem rgba(33,37,41,0.15);
+            }
+            .alert { font-size: 0.9rem; }
+        </style>
+    </head>
+    <body>
+        <!-- Navigation-->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container px-4 px-lg-5">
+                <a class="navbar-brand fw-bold" href="index.html">Mi Tienda</a>
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                        <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link" href="about.html">Nosotros</a></li>
+                    </ul>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="carrito.html" class="btn btn-outline-dark">
+                            <i class="bi-cart-fill me-1"></i>Carrito
+                            <span class="badge bg-dark text-white ms-1 rounded-pill" id="cart-count">0</span>
+                        </a>
+                        <a href="login.html" class="btn btn-dark active">
+                            <i class="bi-person-fill me-1"></i>Iniciar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="login-wrapper">
+            <div class="login-card">
+                <div class="text-center mb-4">
+                    <div class="brand-icon"><i class="bi-shop"></i></div>
+                    <h4 class="fw-bold mt-2">Mi Tienda</h4>
+                </div>
+
+                <!-- Tabs -->
+                <div class="d-flex border-bottom mb-4">
+                    <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Iniciar Sesión</button>
+                    <button class="tab-btn" id="tab-register" onclick="switchTab('register')">Registrarse</button>
+                </div>
+
+                <!-- Alert -->
+                <div id="alert-box" class="alert" role="alert" style="display:none"></div>
+
+                <!-- Login Form -->
+                <div id="form-login">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Usuario o Correo</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi-person"></i></span>
+                            <input type="text" class="form-control" id="login-usuario" placeholder="tu_usuario" />
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Contraseña</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi-lock"></i></span>
+                            <input type="password" class="form-control" id="login-password" placeholder="••••••••" />
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePass('login-password', this)"><i class="bi-eye"></i></button>
+                        </div>
+                    </div>
+                    <button class="btn btn-dark w-100 py-2 fw-semibold" onclick="doLogin()">
+                        <i class="bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+                    </button>
+                    <p class="text-center mt-3 text-muted small">¿No tienes cuenta? <a href="#" onclick="switchTab('register')" class="text-dark fw-semibold">Regístrate aquí</a></p>
+                </div>
+
+                <!-- Register Form -->
+                <div id="form-register" style="display:none">
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Nombre</label>
+                            <input type="text" class="form-control" id="reg-nombre" placeholder="Juan" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Apellido</label>
+                            <input type="text" class="form-control" id="reg-apellido" placeholder="Pérez" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Usuario</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi-person"></i></span>
+                            <input type="text" class="form-control" id="reg-usuario" placeholder="mi_usuario" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Correo electrónico</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi-envelope"></i></span>
+                            <input type="email" class="form-control" id="reg-correo" placeholder="correo@ejemplo.com" />
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Contraseña</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi-lock"></i></span>
+                            <input type="password" class="form-control" id="reg-password" placeholder="••••••••" />
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePass('reg-password', this)"><i class="bi-eye"></i></button>
+                        </div>
+                    </div>
+                    <button class="btn btn-dark w-100 py-2 fw-semibold" onclick="doRegister()">
+                        <i class="bi-person-plus me-2"></i>Crear Cuenta
+                    </button>
+                    <p class="text-center mt-3 text-muted small">¿Ya tienes cuenta? <a href="#" onclick="switchTab('login')" class="text-dark fw-semibold">Inicia sesión</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer-->
+        <footer class="py-4 bg-dark">
+            <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Mi Tienda 2024</p></div>
+        </footer>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            // Redirect if already logged in
+            if (localStorage.getItem('currentUser')) { window.location.href = 'index.html'; }
+
+            // Cart count
+            function getCart() { return JSON.parse(localStorage.getItem('cart') || '[]'); }
+            document.getElementById('cart-count').textContent = getCart().reduce((s,i) => s+i.cantidad, 0);
+
+            function switchTab(tab) {
+                document.getElementById('form-login').style.display = tab === 'login' ? '' : 'none';
+                document.getElementById('form-register').style.display = tab === 'register' ? '' : 'none';
+                document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+                document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+                hideAlert();
+            }
+
+            function showAlert(msg, type) {
+                const el = document.getElementById('alert-box');
+                el.className = 'alert alert-' + type;
+                el.textContent = msg;
+                el.style.display = '';
+            }
+            function hideAlert() { document.getElementById('alert-box').style.display = 'none'; }
+
+            function togglePass(id, btn) {
+                const input = document.getElementById(id);
+                if (input.type === 'password') { input.type = 'text'; btn.innerHTML = '<i class="bi-eye-slash"></i>'; }
+                else { input.type = 'password'; btn.innerHTML = '<i class="bi-eye"></i>'; }
+            }
+
+            function getUsers() { return JSON.parse(localStorage.getItem('users') || '[]'); }
+            function saveUsers(users) { localStorage.setItem('users', JSON.stringify(users)); }
+
+            function doLogin() {
+                const usuario = document.getElementById('login-usuario').value.trim();
+                const password = document.getElementById('login-password').value;
+                if (!usuario || !password) { showAlert('Por favor completa todos los campos.', 'warning'); return; }
+                const users = getUsers();
+                const user = users.find(u => (u.usuario === usuario || u.correo === usuario) && u.contrasena === password);
+                if (!user) { showAlert('Usuario o contraseña incorrectos.', 'danger'); return; }
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                window.location.href = 'index.html';
+            }
+
+            function doRegister() {
+                const nombre = document.getElementById('reg-nombre').value.trim();
+                const apellido = document.getElementById('reg-apellido').value.trim();
+                const usuario = document.getElementById('reg-usuario').value.trim();
+                const correo = document.getElementById('reg-correo').value.trim();
+                const contrasena = document.getElementById('reg-password').value;
+                if (!nombre || !apellido || !usuario || !correo || !contrasena) {
+                    showAlert('Por favor completa todos los campos.', 'warning'); return;
+                }
+                if (contrasena.length < 6) { showAlert('La contraseña debe tener al menos 6 caracteres.', 'warning'); return; }
+                const users = getUsers();
+                if (users.find(u => u.usuario === usuario)) { showAlert('El nombre de usuario ya está en uso.', 'danger'); return; }
+                if (users.find(u => u.correo === correo)) { showAlert('El correo ya está registrado.', 'danger'); return; }
+                const newUser = { nombre, apellido, usuario, correo, contrasena, rol: 'cliente', id: Date.now() };
+                users.push(newUser);
+                saveUsers(users);
+                localStorage.setItem('currentUser', JSON.stringify(newUser));
+                window.location.href = 'index.html';
+            }
+
+            // Enter key support
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Enter') {
+                    if (document.getElementById('form-login').style.display !== 'none') doLogin();
+                    else doRegister();
+                }
+            });
+        </script>
+    </body>
+</html>
