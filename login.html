@@ -193,15 +193,19 @@
                 const usuario = document.getElementById('login-usuario').value.trim();
                 const password = document.getElementById('login-password').value;
                 if (!usuario || !password) { showAlert('Por favor completa todos los campos.', 'warning'); return; }
-                const res = await fetch('auth_login.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ usuario, contrasena: password })
-                });
-                const data = await res.json();
-                if (!data.ok) { showAlert(data.msg, 'danger'); return; }
-                localStorage.setItem('currentUser', JSON.stringify(data.user));
-                window.location.href = 'index.html';
+                try {
+                    const res = await fetch('auth_login.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ usuario, contrasena: password })
+                    });
+                    const data = await res.json();
+                    if (!data.ok) { showAlert(data.msg, 'danger'); return; }
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
+                    window.location.href = 'index.html';
+                } catch (e) {
+                    showAlert('No se pudo conectar al servidor.', 'danger');
+                }
             }
 
             async function doRegister() {
@@ -210,15 +214,23 @@
                 const usuario   = document.getElementById('reg-usuario').value.trim();
                 const correo    = document.getElementById('reg-correo').value.trim();
                 const contrasena = document.getElementById('reg-password').value;
-                const res = await fetch('auth_register.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre, apellido, usuario, correo, contrasena })
-                });
-                const data = await res.json();
-                if (!data.ok) { showAlert(data.msg, data.msg.includes('campos') ? 'warning' : 'danger'); return; }
-                localStorage.setItem('currentUser', JSON.stringify(data.user));
-                window.location.href = 'index.html';
+                if (!nombre || !apellido || !usuario || !correo || !contrasena) {
+                    showAlert('Por favor completa todos los campos.', 'warning'); return;
+                }
+                if (contrasena.length < 6) { showAlert('La contraseña debe tener al menos 6 caracteres.', 'warning'); return; }
+                try {
+                    const res = await fetch('auth_register.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nombre, apellido, usuario, correo, contrasena })
+                    });
+                    const data = await res.json();
+                    if (!data.ok) { showAlert(data.msg, 'danger'); return; }
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
+                    window.location.href = 'index.html';
+                } catch (e) {
+                    showAlert('No se pudo conectar al servidor.', 'danger');
+                }
             }
 
             // Enter key support
