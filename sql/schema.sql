@@ -45,3 +45,13 @@ CREATE TABLE HISTORIAL_COMPRA (
   FOREIGN KEY (id_usuario) REFERENCES CUENTA(id_usuario),
   FOREIGN KEY (id_carrito) REFERENCES CARRITO(id_carrito)
 );
+
+-- Cuenta de administrador
+INSERT INTO CUENTA (usuario, contrasena, nombre, apellido, correo, rol)
+VALUES ('admin', 'root', 'admin', 'admin', 'fernando21.revilla@gmail.com', 'administrador')
+ON DUPLICATE KEY UPDATE
+  contrasena = VALUES(contrasena),
+  nombre     = VALUES(nombre),
+  apellido   = VALUES(apellido),
+  correo     = VALUES(correo),
+  rol        = VALUES(rol);

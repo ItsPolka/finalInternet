@@ -189,37 +189,35 @@
                 else { input.type = 'password'; btn.innerHTML = '<i class="bi-eye"></i>'; }
             }
 
-            function getUsers() { return JSON.parse(localStorage.getItem('users') || '[]'); }
-            function saveUsers(users) { localStorage.setItem('users', JSON.stringify(users)); }
-
-            function doLogin() {
+            async function doLogin() {
                 const usuario = document.getElementById('login-usuario').value.trim();
                 const password = document.getElementById('login-password').value;
                 if (!usuario || !password) { showAlert('Por favor completa todos los campos.', 'warning'); return; }
-                const users = getUsers();
-                const user = users.find(u => (u.usuario === usuario || u.correo === usuario) && u.contrasena === password);
-                if (!user) { showAlert('Usuario o contraseña incorrectos.', 'danger'); return; }
-                localStorage.setItem('currentUser', JSON.stringify(user));
+                const res = await fetch('auth_login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario, contrasena: password })
+                });
+                const data = await res.json();
+                if (!data.ok) { showAlert(data.msg, 'danger'); return; }
+                localStorage.setItem('currentUser', JSON.stringify(data.user));
                 window.location.href = 'index.html';
             }
 
-            function doRegister() {
-                const nombre = document.getElementById('reg-nombre').value.trim();
-                const apellido = document.getElementById('reg-apellido').value.trim();
-                const usuario = document.getElementById('reg-usuario').value.trim();
-                const correo = document.getElementById('reg-correo').value.trim();
+            async function doRegister() {
+                const nombre    = document.getElementById('reg-nombre').value.trim();
+                const apellido  = document.getElementById('reg-apellido').value.trim();
+                const usuario   = document.getElementById('reg-usuario').value.trim();
+                const correo    = document.getElementById('reg-correo').value.trim();
                 const contrasena = document.getElementById('reg-password').value;
-                if (!nombre || !apellido || !usuario || !correo || !contrasena) {
-                    showAlert('Por favor completa todos los campos.', 'warning'); return;
-                }
-                if (contrasena.length < 6) { showAlert('La contraseña debe tener al menos 6 caracteres.', 'warning'); return; }
-                const users = getUsers();
-                if (users.find(u => u.usuario === usuario)) { showAlert('El nombre de usuario ya está en uso.', 'danger'); return; }
-                if (users.find(u => u.correo === correo)) { showAlert('El correo ya está registrado.', 'danger'); return; }
-                const newUser = { nombre, apellido, usuario, correo, contrasena, rol: 'cliente', id: Date.now() };
-                users.push(newUser);
-                saveUsers(users);
-                localStorage.setItem('currentUser', JSON.stringify(newUser));
+                const res = await fetch('auth_register.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, apellido, usuario, correo, contrasena })
+                });
+                const data = await res.json();
+                if (!data.ok) { showAlert(data.msg, data.msg.includes('campos') ? 'warning' : 'danger'); return; }
+                localStorage.setItem('currentUser', JSON.stringify(data.user));
                 window.location.href = 'index.html';
             }
 

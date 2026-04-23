@@ -46,6 +46,7 @@
                         <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
                         <li class="nav-item"><a class="nav-link" href="about.html">Nosotros</a></li>
                         <li class="nav-item"><a class="nav-link active" aria-current="page" href="historial.html">Historial</a></li>
+                        <li class="nav-item"><a class="nav-link" href="dashboard.php" id="nav-dashboard" style="display:none">Dashboard</a></li>
                     </ul>
                     <div class="d-flex align-items-center gap-2">
                         <a href="carrito.html" class="btn btn-outline-dark">
@@ -147,7 +148,8 @@
                     return;
                 }
 
-                document.getElementById('user-greeting').textContent = 'Hola, ' + user.nombre;
+                document.getElementById('user-greeting').innerHTML = 'Hola, ' + user.nombre + (user.rol === 'administrador' ? ' <span class="badge bg-warning text-dark ms-1" style="font-size:0.7rem">Admin</span>' : '');
+                if (user.rol === 'administrador') { const d = document.getElementById('nav-dashboard'); if(d) d.style.display=''; }
 
                 const history = JSON.parse(localStorage.getItem('historial_' + user.id) || '[]');
 
