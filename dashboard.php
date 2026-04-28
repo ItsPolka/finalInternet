@@ -57,13 +57,13 @@ try {
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container px-4 px-lg-5">
-            <a class="navbar-brand fw-bold" href="index.html">Mi Tienda</a>
+            <a class="navbar-brand fw-bold" href="index.php">Mi Tienda</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-                    <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php">Inicio</a></li>
                     <li class="nav-item"><a class="nav-link" href="about.html">Nosotros</a></li>
                     <li class="nav-item"><a class="nav-link" href="historial.html" id="nav-historial" style="display:none">Historial</a></li>
                     <li class="nav-item"><a class="nav-link active" href="dashboard.php" id="nav-dashboard" style="display:none">Dashboard</a></li>
@@ -88,7 +88,7 @@ try {
         <i class="bi-shield-lock" style="font-size:5rem;color:#dee2e6"></i>
         <h4 class="mt-3 fw-bold text-muted">Acceso Restringido</h4>
         <p class="text-muted">Esta página es solo para administradores.</p>
-        <a href="index.html" class="btn btn-dark mt-2">Volver al inicio</a>
+        <a href="index.php" class="btn btn-dark mt-2">Volver al inicio</a>
     </div>
 
     <!-- Dashboard content (hidden until JS confirms admin) -->
