@@ -231,8 +231,101 @@ try {
                     </div>
                 </div>
 
+                <!-- ── Gestión de Productos ─────────────────────────────── -->
+                <div class="card border-0 shadow-sm rounded-4 mt-5" id="seccion-productos">
+                    <div class="card-header bg-white border-0 pt-4 pb-2 px-4 d-flex align-items-center justify-content-between">
+                        <h5 class="fw-bold mb-0"><i class="bi-box-seam me-2"></i>Gestión de productos</h5>
+                        <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#modalAgregarProducto">
+                            <i class="bi-plus-lg me-1"></i>Agregar producto
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="tabla-productos">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="px-4">ID</th>
+                                        <th>Imagen</th>
+                                        <th>Nombre</th>
+                                        <th>Precio</th>
+                                        <th>Inventario</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productos-tbody">
+                                    <tr><td colspan="6" class="text-center text-muted py-4">
+                                        <span class="spinner-border spinner-border-sm me-2"></span>Cargando productos...
+                                    </td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
+    </div>
+
+    <!-- Modal: Agregar Producto -->
+    <div class="modal fade" id="modalAgregarProducto" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="bi-plus-circle me-2"></i>Agregar producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <div id="msg-agregar" class="alert d-none"></div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nombre <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="prod-nombre" placeholder="Ej: Camiseta Azul" />
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col">
+                            <label class="form-label fw-semibold">Precio ($) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="prod-precio" min="0" step="0.01" placeholder="0.00" />
+                        </div>
+                        <div class="col">
+                            <label class="form-label fw-semibold">Inventario</label>
+                            <input type="number" class="form-control" id="prod-inventario" min="0" value="0" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Imagen del producto</label>
+                        <input type="file" class="form-control" id="prod-imagen" accept="image/jpeg,image/png,image/webp,image/gif" />
+                        <div class="form-text">Formatos: JPG, PNG, WEBP, GIF</div>
+                    </div>
+                    <div id="preview-imagen" class="text-center mt-2 d-none">
+                        <img id="preview-img" src="" alt="Vista previa" class="img-thumbnail" style="max-height:160px" />
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-dark" id="btn-guardar-producto" onclick="guardarProducto()">
+                        <i class="bi-check-lg me-1"></i>Guardar producto
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Confirmar eliminación -->
+    <div class="modal fade" id="modalEliminar" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold text-danger"><i class="bi-trash me-2"></i>Eliminar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body pt-0">
+                    <p class="mb-0">¿Eliminar <strong id="nombre-a-eliminar"></strong>? Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-danger btn-sm" id="btn-confirmar-eliminar">Eliminar</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <footer class="py-4 bg-dark mt-5">
@@ -271,6 +364,157 @@ try {
             document.getElementById('nav-dashboard').style.display = '';
             document.getElementById('dashboard-content').style.display = '';
         })();
+    </script>
+    <script>
+        // ── Productos ────────────────────────────────────────────────────────
+        let productoIdAEliminar = null;
+
+        async function cargarProductos() {
+            try {
+                const res  = await fetch('driver_productos.php');
+                const data = await res.json();
+                const tbody = document.getElementById('productos-tbody');
+                if (!data.ok || !data.productos.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Sin productos en el catálogo</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.productos.map(p => `
+                    <tr>
+                        <td class="px-4 text-muted">${p.id_producto}</td>
+                        <td>
+                            ${p.imagen
+                                ? `<img src="${p.imagen}" alt="${escHtml(p.nombre)}" style="width:56px;height:42px;object-fit:cover;border-radius:6px;">`
+                                : `<div class="d-flex align-items-center justify-content-center bg-light rounded" style="width:56px;height:42px"><i class="bi-image text-muted"></i></div>`}
+                        </td>
+                        <td class="fw-semibold">${escHtml(p.nombre)}</td>
+                        <td>$${parseFloat(p.precio).toFixed(2)}</td>
+                        <td>
+                            <span class="badge ${p.inventario > 0 ? 'bg-success' : 'bg-secondary'}">
+                                ${p.inventario}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-outline-danger btn-sm"
+                                    onclick="pedirEliminar(${p.id_producto}, '${escHtml(p.nombre).replace(/'/g,"\\'")}')">
+                                <i class="bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                document.getElementById('productos-tbody').innerHTML =
+                    '<tr><td colspan="6" class="text-center text-danger py-3">Error al cargar productos</td></tr>';
+            }
+        }
+
+        function escHtml(str) {
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // Vista previa de imagen en el modal
+        document.getElementById('prod-imagen').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                document.getElementById('preview-img').src = url;
+                document.getElementById('preview-imagen').classList.remove('d-none');
+            } else {
+                document.getElementById('preview-imagen').classList.add('d-none');
+            }
+        });
+
+        async function guardarProducto() {
+            const nombre     = document.getElementById('prod-nombre').value.trim();
+            const precio     = parseFloat(document.getElementById('prod-precio').value);
+            const inventario = parseInt(document.getElementById('prod-inventario').value) || 0;
+            const imagenFile = document.getElementById('prod-imagen').files[0];
+            const msgEl      = document.getElementById('msg-agregar');
+
+            msgEl.className = 'alert d-none';
+
+            if (!nombre || !precio || precio <= 0) {
+                msgEl.className = 'alert alert-danger';
+                msgEl.textContent = 'Nombre y precio son obligatorios.';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('nombre', nombre);
+            formData.append('precio', precio);
+            formData.append('inventario', inventario);
+            if (imagenFile) formData.append('imagen', imagenFile);
+
+            const btn = document.getElementById('btn-guardar-producto');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
+
+            try {
+                const res  = await fetch('driver_productos.php', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.ok) {
+                    msgEl.className = 'alert alert-success';
+                    msgEl.textContent = '✓ Producto agregado correctamente.';
+                    document.getElementById('prod-nombre').value = '';
+                    document.getElementById('prod-precio').value = '';
+                    document.getElementById('prod-inventario').value = '0';
+                    document.getElementById('prod-imagen').value = '';
+                    document.getElementById('preview-imagen').classList.add('d-none');
+                    cargarProductos();
+                } else {
+                    msgEl.className = 'alert alert-danger';
+                    msgEl.textContent = data.msg || 'Error al guardar.';
+                }
+            } catch (e) {
+                msgEl.className = 'alert alert-danger';
+                msgEl.textContent = 'Error de conexión.';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi-check-lg me-1"></i>Guardar producto';
+        }
+
+        function pedirEliminar(id, nombre) {
+            productoIdAEliminar = id;
+            document.getElementById('nombre-a-eliminar').textContent = nombre;
+            new bootstrap.Modal(document.getElementById('modalEliminar')).show();
+        }
+
+        document.getElementById('btn-confirmar-eliminar').addEventListener('click', async function() {
+            if (!productoIdAEliminar) return;
+            this.disabled = true;
+            this.textContent = 'Eliminando...';
+            try {
+                const res  = await fetch('driver_productos.php', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id_producto: productoIdAEliminar })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalEliminar')).hide();
+                    cargarProductos();
+                } else {
+                    alert(data.msg || 'Error al eliminar.');
+                }
+            } catch(e) {
+                alert('Error de conexión.');
+            }
+            this.disabled = false;
+            this.textContent = 'Eliminar';
+            productoIdAEliminar = null;
+        });
+
+        // Limpiar modal al cerrarse
+        document.getElementById('modalAgregarProducto').addEventListener('hidden.bs.modal', function() {
+            document.getElementById('msg-agregar').className = 'alert d-none';
+        });
+
+        // Cargar productos cuando el admin esté autenticado
+        const _origCheckAuth = window.onload;
+        window.addEventListener('DOMContentLoaded', () => {
+            const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            if (user && user.rol === 'administrador') cargarProductos();
+        });
     </script>
 </body>
 </html>
