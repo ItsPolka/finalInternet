@@ -1,12 +1,12 @@
 <?php
 header('Content-Type: application/json');
 
-$host = 'db';          // docker-compose service name
+$host = 'db';
 $db   = 'tienda_db';
 $user = 'tienda_user';
 $pass = 'tienda_pass';
 
-$data = json_decode(file_get_contents('php://input'), true);
+$data      = json_decode(file_get_contents('php://input'), true);
 $usuario   = trim($data['usuario'] ?? '');
 $contrasena = $data['contrasena'] ?? '';
 
@@ -28,11 +28,10 @@ try {
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$row) {
-        echo json_encode(['ok' => false, 'msg' => 'Usuario o contraseña incorrectos.']);
+        echo json_encode(['ok' => false, 'msg' => 'Usuario o contrasena incorrectos.']);
         exit;
     }
 
-    // Return user data (id mapped to match frontend key)
     echo json_encode([
         'ok'   => true,
         'user' => [

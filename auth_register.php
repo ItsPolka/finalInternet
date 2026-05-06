@@ -18,7 +18,7 @@ if (!$nombre || !$apellido || !$usuario || !$correo || !$contrasena) {
     exit;
 }
 if (strlen($contrasena) < 6) {
-    echo json_encode(['ok' => false, 'msg' => 'La contraseña debe tener al menos 6 caracteres.']);
+    echo json_encode(['ok' => false, 'msg' => 'La contrasena debe tener al menos 6 caracteres.']);
     exit;
 }
 
@@ -26,15 +26,14 @@ try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Check duplicates
     $chk = $pdo->prepare('SELECT usuario, correo FROM CUENTA WHERE usuario = ? OR correo = ?');
     $chk->execute([$usuario, $correo]);
     $existing = $chk->fetch(PDO::FETCH_ASSOC);
     if ($existing) {
         if ($existing['usuario'] === $usuario) {
-            echo json_encode(['ok' => false, 'msg' => 'El nombre de usuario ya está en uso.']);
+            echo json_encode(['ok' => false, 'msg' => 'El nombre de usuario ya esta en uso.']);
         } else {
-            echo json_encode(['ok' => false, 'msg' => 'El correo ya está registrado.']);
+            echo json_encode(['ok' => false, 'msg' => 'El correo ya esta registrado.']);
         }
         exit;
     }

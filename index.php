@@ -24,11 +24,9 @@ try {
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <title>Inicio</title>
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
         <link href="css/styles.css" rel="stylesheet" />
     </head>
     <body>
-        <!-- Navigation -->
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container px-4 px-lg-5">
                 <a class="navbar-brand fw-bold" href="index.php">Mi Tienda</a>
@@ -37,28 +35,22 @@ try {
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
                         <li class="nav-item"><a class="nav-link active" aria-current="page" href="index.php">Inicio</a></li>
                         <li class="nav-item"><a class="nav-link" href="about.html">Nosotros</a></li>
-                        <li class="nav-item"><a class="nav-link" href="historial.html" id="nav-historial" style="display:none">Historial</a></li>
+                        <li class="nav-item"><a class="nav-link" href="historial.php" id="nav-historial" style="display:none">Historial</a></li>
                         <li class="nav-item"><a class="nav-link" href="dashboard.php" id="nav-dashboard" style="display:none">Dashboard</a></li>
                     </ul>
                     <div class="d-flex align-items-center gap-2">
-                        <a href="carrito.html" class="btn btn-outline-dark">
-                            <i class="bi-cart-fill me-1"></i>
+                        <a href="carrito.php" class="btn btn-outline-dark">
                             Carrito
                             <span class="badge bg-dark text-white ms-1 rounded-pill" id="cart-count">0</span>
                         </a>
-                        <a href="login.html" class="btn btn-dark" id="btn-login">
-                            <i class="bi-person-fill me-1"></i>Iniciar Sesión
-                        </a>
+                        <a href="login.html" class="btn btn-dark" id="btn-login">Iniciar Sesion</a>
                         <span class="navbar-text me-2 fw-semibold" id="user-greeting" style="display:none"></span>
-                        <button class="btn btn-outline-danger" id="btn-logout" style="display:none" onclick="logout()">
-                            <i class="bi-box-arrow-right me-1"></i>Cerrar Sesión
-                        </button>
+                        <button class="btn btn-outline-danger" id="btn-logout" style="display:none" onclick="logout()">Cerrar Sesion</button>
                     </div>
                 </div>
             </div>
         </nav>
 
-        <!-- Header -->
         <header class="bg-dark py-5">
             <div class="container px-4 px-lg-5 my-5">
                 <div class="text-center text-white">
@@ -68,21 +60,19 @@ try {
             </div>
         </header>
 
-        <!-- Productos -->
         <section class="py-5">
             <div class="container px-4 px-lg-5 mt-5">
 
                 <?php if ($dbError): ?>
                 <div class="alert alert-danger">
-                    <i class="bi-exclamation-triangle me-2"></i>Error al cargar productos: <?= htmlspecialchars($dbError) ?>
+                    Error al cargar productos: <?= htmlspecialchars($dbError) ?>
                 </div>
                 <?php endif; ?>
 
                 <?php if (empty($productos) && !$dbError): ?>
                 <div class="text-center py-5">
-                    <i class="bi-box-seam" style="font-size:4rem;color:#dee2e6"></i>
-                    <h4 class="mt-3 text-muted">Sin productos disponibles</h4>
-                    <p class="text-muted">El catálogo está vacío. El administrador debe agregar productos.</p>
+                    <h4 class="text-muted">Sin productos disponibles</h4>
+                    <p class="text-muted">El catalogo esta vacio. El administrador debe agregar productos.</p>
                 </div>
                 <?php else: ?>
                 <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
@@ -95,8 +85,8 @@ try {
                                      alt="<?= htmlspecialchars($p['nombre']) ?>"
                                      style="height:220px;object-fit:cover;" />
                             <?php else: ?>
-                                <div class="d-flex align-items-center justify-content-center bg-light" style="height:220px">
-                                    <i class="bi-image text-muted" style="font-size:3rem"></i>
+                                <div class="d-flex align-items-center justify-content-center bg-light text-muted" style="height:220px;font-size:0.85rem;">
+                                    Sin imagen
                                 </div>
                             <?php endif; ?>
 
@@ -111,7 +101,7 @@ try {
                                 <div class="text-center">
                                     <?php if ($p['inventario'] > 0): ?>
                                     <button class="btn btn-outline-dark mt-auto"
-                                            onclick="addToCart(<?= $p['id_producto'] ?>, '<?= htmlspecialchars(addslashes($p['nombre'])) ?>', <?= $p['precio'] ?>)">
+                                            onclick="addToCart(<?= $p['id_producto'] ?>, '<?= htmlspecialchars(addslashes($p['nombre'])) ?>', <?= $p['precio'] ?>, this)">
                                         Agregar al carrito
                                     </button>
                                     <?php else: ?>
@@ -128,16 +118,14 @@ try {
             </div>
         </section>
 
-        <!-- Footer -->
         <footer class="py-5 bg-dark">
             <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Mi Tienda 2024</p></div>
         </footer>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="js/scripts.js"></script>
         <script>
             function checkAuth() {
-                const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                const user    = JSON.parse(localStorage.getItem('currentUser') || 'null');
                 const isAdmin = user && user.rol === 'administrador';
                 if (user) {
                     document.getElementById('btn-login').style.display = 'none';
@@ -161,27 +149,49 @@ try {
                 window.location.href = 'login.html';
             }
 
-            function getCart()       { return JSON.parse(localStorage.getItem('cart') || '[]'); }
-            function saveCart(cart)  { localStorage.setItem('cart', JSON.stringify(cart)); }
-            function updateCartCount() {
-                const total = getCart().reduce((s, i) => s + i.cantidad, 0);
-                document.getElementById('cart-count').textContent = total;
+            async function updateCartCount() {
+                const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                if (!user) { document.getElementById('cart-count').textContent = '0'; return; }
+                try {
+                    const r = await fetch('carrito.php?count=1&id_usuario=' + user.id);
+                    const d = await r.json();
+                    document.getElementById('cart-count').textContent = d.count || 0;
+                } catch(e) { document.getElementById('cart-count').textContent = '0'; }
             }
 
-            function addToCart(id, nombre, precio) {
-                const cart = getCart();
-                const existing = cart.find(i => i.id === id);
-                if (existing) { existing.cantidad++; }
-                else { cart.push({ id, nombre, precio, cantidad: 1 }); }
-                saveCart(cart);
-                updateCartCount();
-                const btn = event.target;
-                btn.textContent = '✓ Agregado';
-                btn.classList.replace('btn-outline-dark', 'btn-success');
-                setTimeout(() => {
-                    btn.textContent = 'Agregar al carrito';
-                    btn.classList.replace('btn-success', 'btn-outline-dark');
-                }, 1200);
+            async function addToCart(id, nombre, precio, btn) {
+                const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                if (!user) {
+                    if (confirm('Necesitas iniciar sesion para agregar productos al carrito.')) {
+                        window.location.href = 'login.html';
+                    }
+                    return;
+                }
+                btn.disabled = true;
+                try {
+                    const res  = await fetch('carrito.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'add', id_usuario: user.id, id_producto: id, cantidad: 1 })
+                    });
+                    const data = await res.json();
+                    if (data.ok) {
+                        document.getElementById('cart-count').textContent = data.cart_count;
+                        btn.textContent = 'Agregado';
+                        btn.classList.replace('btn-outline-dark', 'btn-success');
+                        setTimeout(() => {
+                            btn.textContent = 'Agregar al carrito';
+                            btn.classList.replace('btn-success', 'btn-outline-dark');
+                            btn.disabled = false;
+                        }, 1200);
+                    } else {
+                        alert(data.msg || 'Error al agregar al carrito.');
+                        btn.disabled = false;
+                    }
+                } catch(e) {
+                    alert('Error de conexion.');
+                    btn.disabled = false;
+                }
             }
 
             checkAuth();

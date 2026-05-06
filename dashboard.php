@@ -6,7 +6,7 @@ $db   = 'tienda_db';
 $user = 'tienda_user';
 $pass = 'tienda_pass';
 
-$stats = ['usuarios' => 0, 'productos' => 0, 'compras' => 0, 'ingresos' => 0.0];
+$stats    = ['usuarios' => 0, 'productos' => 0, 'compras' => 0, 'ingresos' => 0.0];
 $usuarios = [];
 $compras  = [];
 
@@ -39,14 +39,12 @@ try {
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-    <title>Dashboard — Admin</title>
+    <title>Dashboard - Admin</title>
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico"/>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet"/>
     <link href="css/styles.css" rel="stylesheet"/>
     <style>
         .stat-card { border: none; border-radius: 1rem; box-shadow: 0 2px 16px rgba(0,0,0,0.08); }
         .stat-val  { font-size: 2rem; font-weight: 800; color: #212529; }
-        .stat-icon { font-size: 2rem; opacity: .15; }
         .table th  { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: #6c757d; }
         .badge-admin  { background: #ffc107; color: #212529; }
         .badge-client { background: #e9ecef; color: #495057; }
@@ -54,7 +52,6 @@ try {
     </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container px-4 px-lg-5">
             <a class="navbar-brand fw-bold" href="index.php">Mi Tienda</a>
@@ -65,37 +62,32 @@ try {
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
                     <li class="nav-item"><a class="nav-link" href="index.php">Inicio</a></li>
                     <li class="nav-item"><a class="nav-link" href="about.html">Nosotros</a></li>
-                    <li class="nav-item"><a class="nav-link" href="historial.html" id="nav-historial" style="display:none">Historial</a></li>
+                    <li class="nav-item"><a class="nav-link" href="historial.php" id="nav-historial" style="display:none">Historial</a></li>
                     <li class="nav-item"><a class="nav-link active" href="dashboard.php" id="nav-dashboard" style="display:none">Dashboard</a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-2">
-                    <a href="carrito.html" class="btn btn-outline-dark">
-                        <i class="bi-cart-fill me-1"></i>Carrito
+                    <a href="carrito.php" class="btn btn-outline-dark">
+                        Carrito
                         <span class="badge bg-dark text-white ms-1 rounded-pill" id="cart-count">0</span>
                     </a>
-                    <a href="login.html" class="btn btn-dark" id="btn-login"><i class="bi-person-fill me-1"></i>Iniciar Sesión</a>
+                    <a href="login.html" class="btn btn-dark" id="btn-login">Iniciar Sesion</a>
                     <span class="navbar-text me-2 fw-semibold" id="user-greeting" style="display:none"></span>
-                    <button class="btn btn-outline-danger" id="btn-logout" style="display:none" onclick="logout()">
-                        <i class="bi-box-arrow-right me-1"></i>Cerrar Sesión
-                    </button>
+                    <button class="btn btn-outline-danger" id="btn-logout" style="display:none" onclick="logout()">Cerrar Sesion</button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Access denied (shown until JS confirms admin) -->
     <div id="access-denied" style="display:none">
-        <i class="bi-shield-lock" style="font-size:5rem;color:#dee2e6"></i>
         <h4 class="mt-3 fw-bold text-muted">Acceso Restringido</h4>
-        <p class="text-muted">Esta página es solo para administradores.</p>
+        <p class="text-muted">Esta pagina es solo para administradores.</p>
         <a href="index.php" class="btn btn-dark mt-2">Volver al inicio</a>
     </div>
 
-    <!-- Dashboard content (hidden until JS confirms admin) -->
     <div id="dashboard-content" style="display:none">
         <header class="bg-dark py-4">
             <div class="container px-4 px-lg-5 d-flex align-items-center justify-content-between">
-                <h2 class="text-white fw-bolder mb-0"><i class="bi-speedometer2 me-2"></i>Dashboard</h2>
+                <h2 class="text-white fw-bolder mb-0">Dashboard</h2>
                 <span class="badge bg-warning text-dark fs-6">Admin</span>
             </div>
         </header>
@@ -104,61 +96,39 @@ try {
             <div class="container px-4 px-lg-5">
 
                 <?php if (isset($dbError)): ?>
-                <div class="alert alert-danger"><i class="bi-exclamation-triangle me-2"></i>Error de base de datos: <?= htmlspecialchars($dbError) ?></div>
+                <div class="alert alert-danger">Error de base de datos: <?= htmlspecialchars($dbError) ?></div>
                 <?php endif; ?>
 
-                <!-- Stats -->
                 <div class="row g-4 mb-5">
                     <div class="col-6 col-md-3">
                         <div class="card stat-card p-4">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <div class="text-muted small fw-semibold mb-1">Usuarios</div>
-                                    <div class="stat-val"><?= $stats['usuarios'] ?></div>
-                                </div>
-                                <i class="bi-people stat-icon"></i>
-                            </div>
+                            <div class="text-muted small fw-semibold mb-1">Usuarios</div>
+                            <div class="stat-val"><?= $stats['usuarios'] ?></div>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
                         <div class="card stat-card p-4">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <div class="text-muted small fw-semibold mb-1">Productos</div>
-                                    <div class="stat-val"><?= $stats['productos'] ?></div>
-                                </div>
-                                <i class="bi-box-seam stat-icon"></i>
-                            </div>
+                            <div class="text-muted small fw-semibold mb-1">Productos</div>
+                            <div class="stat-val"><?= $stats['productos'] ?></div>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
                         <div class="card stat-card p-4">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <div class="text-muted small fw-semibold mb-1">Compras</div>
-                                    <div class="stat-val"><?= $stats['compras'] ?></div>
-                                </div>
-                                <i class="bi-bag-check stat-icon"></i>
-                            </div>
+                            <div class="text-muted small fw-semibold mb-1">Compras</div>
+                            <div class="stat-val"><?= $stats['compras'] ?></div>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
                         <div class="card stat-card p-4">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <div class="text-muted small fw-semibold mb-1">Ingresos</div>
-                                    <div class="stat-val">$<?= number_format($stats['ingresos'], 2) ?></div>
-                                </div>
-                                <i class="bi-currency-dollar stat-icon"></i>
-                            </div>
+                            <div class="text-muted small fw-semibold mb-1">Ingresos</div>
+                            <div class="stat-val">$<?= number_format($stats['ingresos'], 2) ?></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Users table -->
                 <div class="card border-0 shadow-sm rounded-4 mb-5">
                     <div class="card-header bg-white border-0 pt-4 pb-2 px-4 d-flex align-items-center justify-content-between">
-                        <h5 class="fw-bold mb-0"><i class="bi-people me-2"></i>Usuarios registrados</h5>
+                        <h5 class="fw-bold mb-0">Usuarios registrados</h5>
                         <span class="badge bg-secondary"><?= count($usuarios) ?></span>
                     </div>
                     <div class="card-body p-0">
@@ -196,10 +166,9 @@ try {
                     </div>
                 </div>
 
-                <!-- Recent purchases -->
                 <div class="card border-0 shadow-sm rounded-4">
                     <div class="card-header bg-white border-0 pt-4 pb-2 px-4 d-flex align-items-center justify-content-between">
-                        <h5 class="fw-bold mb-0"><i class="bi-clock-history me-2"></i>Compras recientes</h5>
+                        <h5 class="fw-bold mb-0">Compras recientes</h5>
                         <span class="badge bg-secondary"><?= count($compras) ?></span>
                     </div>
                     <div class="card-body p-0">
@@ -231,12 +200,11 @@ try {
                     </div>
                 </div>
 
-                <!-- ── Gestión de Productos ─────────────────────────────── -->
                 <div class="card border-0 shadow-sm rounded-4 mt-5" id="seccion-productos">
                     <div class="card-header bg-white border-0 pt-4 pb-2 px-4 d-flex align-items-center justify-content-between">
-                        <h5 class="fw-bold mb-0"><i class="bi-box-seam me-2"></i>Gestión de productos</h5>
+                        <h5 class="fw-bold mb-0">Gestion de productos</h5>
                         <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#modalAgregarProducto">
-                            <i class="bi-plus-lg me-1"></i>Agregar producto
+                            Agregar producto
                         </button>
                     </div>
                     <div class="card-body p-0">
@@ -266,12 +234,11 @@ try {
         </section>
     </div>
 
-    <!-- Modal: Agregar Producto -->
     <div class="modal fade" id="modalAgregarProducto" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold"><i class="bi-plus-circle me-2"></i>Agregar producto</h5>
+                    <h5 class="modal-title fw-bold">Agregar producto</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body pt-2">
@@ -302,23 +269,22 @@ try {
                 <div class="modal-footer border-0 pt-0">
                     <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button class="btn btn-dark" id="btn-guardar-producto" onclick="guardarProducto()">
-                        <i class="bi-check-lg me-1"></i>Guardar producto
+                        Guardar producto
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Confirmar eliminación -->
     <div class="modal fade" id="modalEliminar" tabindex="-1">
         <div class="modal-dialog modal-sm">
             <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header border-0">
-                    <h5 class="modal-title fw-bold text-danger"><i class="bi-trash me-2"></i>Eliminar</h5>
+                    <h5 class="modal-title fw-bold text-danger">Eliminar producto</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body pt-0">
-                    <p class="mb-0">¿Eliminar <strong id="nombre-a-eliminar"></strong>? Esta acción no se puede deshacer.</p>
+                    <p class="mb-0">Eliminar <strong id="nombre-a-eliminar"></strong>? Esta accion no se puede deshacer.</p>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
@@ -334,13 +300,20 @@ try {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        document.getElementById('cart-count').textContent = cart.reduce((s,i) => s+i.cantidad, 0);
-
         function logout() { localStorage.removeItem('currentUser'); window.location.href = 'login.html'; }
 
-        (function checkAuth() {
+        async function updateCartCount() {
             const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            if (!user) { document.getElementById('cart-count').textContent = '0'; return; }
+            try {
+                const r = await fetch('carrito.php?count=1&id_usuario=' + user.id);
+                const d = await r.json();
+                document.getElementById('cart-count').textContent = d.count || 0;
+            } catch(e) { document.getElementById('cart-count').textContent = '0'; }
+        }
+
+        (function checkAuth() {
+            const user    = JSON.parse(localStorage.getItem('currentUser') || 'null');
             const isAdmin = user && user.rol === 'administrador';
 
             if (!user) {
@@ -348,15 +321,14 @@ try {
                 return;
             }
 
-            // Show nav state
             document.getElementById('btn-login').style.display = 'none';
             document.getElementById('btn-logout').style.display = '';
             document.getElementById('user-greeting').style.display = '';
-            document.getElementById('user-greeting').innerHTML = 'Hola, ' + user.nombre + (isAdmin ? ' <span class="badge bg-warning text-dark ms-1" style="font-size:0.7rem">Admin</span>' : '');
+            document.getElementById('user-greeting').innerHTML = 'Hola, ' + user.nombre +
+                (isAdmin ? ' <span class="badge bg-warning text-dark ms-1" style="font-size:0.7rem">Admin</span>' : '');
             document.getElementById('nav-historial').style.display = '';
 
             if (!isAdmin) {
-                // Logged in but not admin
                 document.getElementById('access-denied').style.display = '';
                 return;
             }
@@ -364,18 +336,19 @@ try {
             document.getElementById('nav-dashboard').style.display = '';
             document.getElementById('dashboard-content').style.display = '';
         })();
+
+        updateCartCount();
     </script>
     <script>
-        // ── Productos ────────────────────────────────────────────────────────
         let productoIdAEliminar = null;
 
         async function cargarProductos() {
             try {
-                const res  = await fetch('driver_productos.php');
-                const data = await res.json();
+                const res   = await fetch('driver_productos.php');
+                const data  = await res.json();
                 const tbody = document.getElementById('productos-tbody');
                 if (!data.ok || !data.productos.length) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Sin productos en el catálogo</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Sin productos en el catalogo</td></tr>';
                     return;
                 }
                 tbody.innerHTML = data.productos.map(p => `
@@ -383,8 +356,8 @@ try {
                         <td class="px-4 text-muted">${p.id_producto}</td>
                         <td>
                             ${p.imagen
-                                ? `<img src="${p.imagen}" alt="${escHtml(p.nombre)}" style="width:56px;height:42px;object-fit:cover;border-radius:6px;">`
-                                : `<div class="d-flex align-items-center justify-content-center bg-light rounded" style="width:56px;height:42px"><i class="bi-image text-muted"></i></div>`}
+                                ? `<img src="${escHtml(p.imagen)}" alt="${escHtml(p.nombre)}" style="width:56px;height:42px;object-fit:cover;border-radius:6px;">`
+                                : `<div class="d-flex align-items-center justify-content-center bg-light rounded text-muted" style="width:56px;height:42px;font-size:0.65rem;">sin img</div>`}
                         </td>
                         <td class="fw-semibold">${escHtml(p.nombre)}</td>
                         <td>$${parseFloat(p.precio).toFixed(2)}</td>
@@ -396,7 +369,7 @@ try {
                         <td class="text-center">
                             <button class="btn btn-outline-danger btn-sm"
                                     onclick="pedirEliminar(${p.id_producto}, '${escHtml(p.nombre).replace(/'/g,"\\'")}')">
-                                <i class="bi-trash"></i>
+                                Eliminar
                             </button>
                         </td>
                     </tr>
@@ -411,7 +384,6 @@ try {
             return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
         }
 
-        // Vista previa de imagen en el modal
         document.getElementById('prod-imagen').addEventListener('change', function() {
             const file = this.files[0];
             if (file) {
@@ -453,7 +425,7 @@ try {
                 const data = await res.json();
                 if (data.ok) {
                     msgEl.className = 'alert alert-success';
-                    msgEl.textContent = '✓ Producto agregado correctamente.';
+                    msgEl.textContent = 'Producto agregado correctamente.';
                     document.getElementById('prod-nombre').value = '';
                     document.getElementById('prod-precio').value = '';
                     document.getElementById('prod-inventario').value = '0';
@@ -466,11 +438,11 @@ try {
                 }
             } catch (e) {
                 msgEl.className = 'alert alert-danger';
-                msgEl.textContent = 'Error de conexión.';
+                msgEl.textContent = 'Error de conexion.';
             }
 
             btn.disabled = false;
-            btn.innerHTML = '<i class="bi-check-lg me-1"></i>Guardar producto';
+            btn.textContent = 'Guardar producto';
         }
 
         function pedirEliminar(id, nombre) {
@@ -497,20 +469,17 @@ try {
                     alert(data.msg || 'Error al eliminar.');
                 }
             } catch(e) {
-                alert('Error de conexión.');
+                alert('Error de conexion.');
             }
             this.disabled = false;
             this.textContent = 'Eliminar';
             productoIdAEliminar = null;
         });
 
-        // Limpiar modal al cerrarse
         document.getElementById('modalAgregarProducto').addEventListener('hidden.bs.modal', function() {
             document.getElementById('msg-agregar').className = 'alert d-none';
         });
 
-        // Cargar productos cuando el admin esté autenticado
-        const _origCheckAuth = window.onload;
         window.addEventListener('DOMContentLoaded', () => {
             const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
             if (user && user.rol === 'administrador') cargarProductos();

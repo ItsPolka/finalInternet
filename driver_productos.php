@@ -16,13 +16,12 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['ok' => false, 'msg' => 'Error de conexión: ' . $e->getMessage()]);
+    echo json_encode(['ok' => false, 'msg' => 'Error de conexion: ' . $e->getMessage()]);
     exit;
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-// ── GET: listar todos los productos ──────────────────────────────────────────
 if ($method === 'GET') {
     $productos = $pdo->query(
         'SELECT id_producto, nombre, inventario, precio, imagen FROM CATALOGO ORDER BY id_producto DESC'
@@ -31,9 +30,8 @@ if ($method === 'GET') {
     exit;
 }
 
-// ── POST: agregar producto con imagen ─────────────────────────────────────────
 if ($method === 'POST') {
-    $nombre     = trim($_POST['nombre']    ?? '');
+    $nombre     = trim($_POST['nombre']       ?? '');
     $inventario = intval($_POST['inventario'] ?? 0);
     $precio     = floatval($_POST['precio']   ?? 0);
 
@@ -49,16 +47,16 @@ if ($method === 'POST') {
         $uploadDir = __DIR__ . '/uploads/productos/';
         if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
 
-        $ext      = strtolower(pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION));
-        $allowed  = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+        $ext     = strtolower(pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION));
+        $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
         if (!in_array($ext, $allowed)) {
             http_response_code(400);
             echo json_encode(['ok' => false, 'msg' => 'Formato de imagen no permitido.']);
             exit;
         }
 
-        $filename   = uniqid('prod_', true) . '.' . $ext;
-        $destino    = $uploadDir . $filename;
+        $filename = uniqid('prod_', true) . '.' . $ext;
+        $destino  = $uploadDir . $filename;
 
         if (!move_uploaded_file($_FILES['imagen']['tmp_name'], $destino)) {
             http_response_code(500);
@@ -75,8 +73,8 @@ if ($method === 'POST') {
     $id = $pdo->lastInsertId();
 
     echo json_encode([
-        'ok'      => true,
-        'msg'     => 'Producto agregado.',
+        'ok'       => true,
+        'msg'      => 'Producto agregado.',
         'producto' => [
             'id_producto' => $id,
             'nombre'      => $nombre,
@@ -88,18 +86,16 @@ if ($method === 'POST') {
     exit;
 }
 
-// ── DELETE: eliminar producto ─────────────────────────────────────────────────
 if ($method === 'DELETE') {
     $input = json_decode(file_get_contents('php://input'), true);
     $id    = intval($input['id_producto'] ?? 0);
 
     if (!$id) {
         http_response_code(400);
-        echo json_encode(['ok' => false, 'msg' => 'ID inválido.']);
+        echo json_encode(['ok' => false, 'msg' => 'ID invalido.']);
         exit;
     }
 
-    // Borrar imagen del disco si existe
     $row = $pdo->prepare('SELECT imagen FROM CATALOGO WHERE id_producto = ?');
     $row->execute([$id]);
     $producto = $row->fetch(PDO::FETCH_ASSOC);
@@ -115,4 +111,4 @@ if ($method === 'DELETE') {
 }
 
 http_response_code(405);
-echo json_encode(['ok' => false, 'msg' => 'Método no permitido.']);
+echo json_encode(['ok' => false, 'msg' => 'Metodo no permitido.']);
