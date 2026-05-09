@@ -1,3 +1,84 @@
+<?php
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+    $data = json_decode(file_get_contents('php://input'), true) ?? [];
+    $action = $data['action'] ?? '';
+
+    try {
+        $pdo = new PDO("mysql:host=db;dbname=tienda_db;charset=utf8", 'tienda_user', 'tienda_pass');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        if ($action === 'login') {
+            $usuario    = trim($data['usuario']    ?? '');
+            $contrasena = $data['contrasena'] ?? '';
+            if (!$usuario || !$contrasena) {
+                echo json_encode(['ok' => false, 'msg' => 'Por favor completa todos los campos.']);
+                exit;
+            }
+            $stmt = $pdo->prepare(
+                'SELECT id_usuario, nombre, apellido, usuario, correo, rol
+                 FROM CUENTA WHERE (usuario = ? OR correo = ?) AND contrasena = ?'
+            );
+            $stmt->execute([$usuario, $usuario, $contrasena]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row) {
+                echo json_encode(['ok' => false, 'msg' => 'Usuario o contrasena incorrectos.']);
+                exit;
+            }
+            echo json_encode(['ok' => true, 'user' => [
+                'id'       => (int)$row['id_usuario'],
+                'nombre'   => $row['nombre'],
+                'apellido' => $row['apellido'],
+                'usuario'  => $row['usuario'],
+                'correo'   => $row['correo'],
+                'rol'      => $row['rol'],
+            ]]);
+
+        } elseif ($action === 'register') {
+            $nombre     = trim($data['nombre']    ?? '');
+            $apellido   = trim($data['apellido']  ?? '');
+            $usuario    = trim($data['usuario']   ?? '');
+            $correo     = trim($data['correo']    ?? '');
+            $contrasena = $data['contrasena'] ?? '';
+            if (!$nombre || !$apellido || !$usuario || !$correo || !$contrasena) {
+                echo json_encode(['ok' => false, 'msg' => 'Por favor completa todos los campos.']);
+                exit;
+            }
+            if (strlen($contrasena) < 6) {
+                echo json_encode(['ok' => false, 'msg' => 'La contrasena debe tener al menos 6 caracteres.']);
+                exit;
+            }
+            $chk = $pdo->prepare('SELECT usuario, correo FROM CUENTA WHERE usuario = ? OR correo = ?');
+            $chk->execute([$usuario, $correo]);
+            $existing = $chk->fetch(PDO::FETCH_ASSOC);
+            if ($existing) {
+                $msg = $existing['usuario'] === $usuario
+                    ? 'El nombre de usuario ya esta en uso.'
+                    : 'El correo ya esta registrado.';
+                echo json_encode(['ok' => false, 'msg' => $msg]);
+                exit;
+            }
+            $pdo->prepare(
+                'INSERT INTO CUENTA (usuario, contrasena, nombre, apellido, correo, rol) VALUES (?, ?, ?, ?, ?, "cliente")'
+            )->execute([$usuario, $contrasena, $nombre, $apellido, $correo]);
+            echo json_encode(['ok' => true, 'user' => [
+                'id'       => (int)$pdo->lastInsertId(),
+                'nombre'   => $nombre,
+                'apellido' => $apellido,
+                'usuario'  => $usuario,
+                'correo'   => $correo,
+                'rol'      => 'cliente',
+            ]]);
+
+        } else {
+            echo json_encode(['ok' => false, 'msg' => 'Accion invalida.']);
+        }
+    } catch (PDOException $e) {
+        echo json_encode(['ok' => false, 'msg' => 'Error de base de datos.']);
+    }
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -58,7 +139,7 @@
                             Carrito
                             <span class="badge bg-dark text-white ms-1 rounded-pill" id="cart-count">0</span>
                         </a>
-                        <a href="login.html" class="btn btn-dark active">Iniciar Sesion</a>
+                        <a href="login.php" class="btn btn-dark active">Iniciar Sesion</a>
                     </div>
                 </div>
             </div>
@@ -137,14 +218,12 @@
         <script>
             if (localStorage.getItem('currentUser')) { window.location.href = 'index.php'; }
 
-            document.getElementById('cart-count').textContent = '0';
-
             function switchTab(tab) {
                 document.getElementById('form-login').style.display    = tab === 'login'    ? '' : 'none';
                 document.getElementById('form-register').style.display = tab === 'register' ? '' : 'none';
                 document.getElementById('tab-login').classList.toggle('active', tab === 'login');
                 document.getElementById('tab-register').classList.toggle('active', tab === 'register');
-                hideAlert();
+                document.getElementById('alert-box').style.display = 'none';
             }
 
             function showAlert(msg, type) {
@@ -153,12 +232,11 @@
                 el.textContent = msg;
                 el.style.display = '';
             }
-            function hideAlert() { document.getElementById('alert-box').style.display = 'none'; }
 
             function togglePass(id, btn) {
                 const input = document.getElementById(id);
-                if (input.type === 'password') { input.type = 'text'; btn.textContent = 'Ocultar'; }
-                else { input.type = 'password'; btn.textContent = 'Ver'; }
+                input.type = input.type === 'password' ? 'text' : 'password';
+                btn.textContent = input.type === 'password' ? 'Ver' : 'Ocultar';
             }
 
             async function doLogin() {
@@ -166,10 +244,10 @@
                 const password = document.getElementById('login-password').value;
                 if (!usuario || !password) { showAlert('Por favor completa todos los campos.', 'warning'); return; }
                 try {
-                    const res  = await fetch('auth_login.php', {
+                    const res  = await fetch('login.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ usuario, contrasena: password })
+                        body: JSON.stringify({ action: 'login', usuario, contrasena: password })
                     });
                     const data = await res.json();
                     if (!data.ok) { showAlert(data.msg, 'danger'); return; }
@@ -191,10 +269,10 @@
                 }
                 if (contrasena.length < 6) { showAlert('La contrasena debe tener al menos 6 caracteres.', 'warning'); return; }
                 try {
-                    const res  = await fetch('auth_register.php', {
+                    const res  = await fetch('login.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ nombre, apellido, usuario, correo, contrasena })
+                        body: JSON.stringify({ action: 'register', nombre, apellido, usuario, correo, contrasena })
                     });
                     const data = await res.json();
                     if (!data.ok) { showAlert(data.msg, 'danger'); return; }

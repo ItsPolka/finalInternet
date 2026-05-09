@@ -43,7 +43,7 @@ try {
                             Carrito
                             <span class="badge bg-dark text-white ms-1 rounded-pill" id="cart-count">0</span>
                         </a>
-                        <a href="login.html" class="btn btn-dark" id="btn-login">Iniciar Sesion</a>
+                        <a href="login.php" class="btn btn-dark" id="btn-login">Iniciar Sesion</a>
                         <span class="navbar-text me-2 fw-semibold" id="user-greeting" style="display:none"></span>
                         <button class="btn btn-outline-danger" id="btn-logout" style="display:none" onclick="logout()">Cerrar Sesion</button>
                     </div>
@@ -146,7 +146,7 @@ try {
 
             function logout() {
                 localStorage.removeItem('currentUser');
-                window.location.href = 'login.html';
+                window.location.href = 'login.php';
             }
 
             async function updateCartCount() {
@@ -163,7 +163,7 @@ try {
                 const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
                 if (!user) {
                     if (confirm('Necesitas iniciar sesion para agregar productos al carrito.')) {
-                        window.location.href = 'login.html';
+                        window.location.href = 'login.php';
                     }
                     return;
                 }

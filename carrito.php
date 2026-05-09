@@ -253,7 +253,7 @@ if ($method === 'GET' && isset($_GET['json'])) {
                             Carrito
                             <span class="badge bg-light text-dark ms-1 rounded-pill" id="cart-count">0</span>
                         </a>
-                        <a href="login.html" class="btn btn-outline-dark" id="btn-login">Iniciar Sesion</a>
+                        <a href="login.php" class="btn btn-outline-dark" id="btn-login">Iniciar Sesion</a>
                         <span class="navbar-text me-2 fw-semibold" id="user-greeting" style="display:none"></span>
                         <button class="btn btn-outline-danger" id="btn-logout" style="display:none" onclick="logout()">Cerrar Sesion</button>
                     </div>
@@ -272,7 +272,7 @@ if ($method === 'GET' && isset($_GET['json'])) {
                 <div id="not-logged" class="empty-cart" style="display:none">
                     <h4 class="fw-bold text-muted">Acceso Restringido</h4>
                     <p class="text-muted">Necesitas iniciar sesion para ver tu carrito.</p>
-                    <a href="login.html" class="btn btn-dark btn-lg mt-2">Iniciar Sesion</a>
+                    <a href="login.php" class="btn btn-dark btn-lg mt-2">Iniciar Sesion</a>
                 </div>
 
                 <div id="empty-cart" class="empty-cart" style="display:none">
@@ -326,7 +326,7 @@ if ($method === 'GET' && isset($_GET['json'])) {
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
         <script>
             function getUser() { return JSON.parse(localStorage.getItem('currentUser') || 'null'); }
-            function logout() { localStorage.removeItem('currentUser'); window.location.href = 'login.html'; }
+            function logout() { localStorage.removeItem('currentUser'); window.location.href = 'login.php'; }
 
             function checkAuth() {
                 const user    = getUser();
@@ -442,7 +442,7 @@ if ($method === 'GET' && isset($_GET['json'])) {
 
             async function checkout() {
                 const user = getUser();
-                if (!user) { window.location.href = 'login.html'; return; }
+                if (!user) { window.location.href = 'login.php'; return; }
 
                 const btn = document.getElementById('btn-checkout');
                 btn.disabled = true;

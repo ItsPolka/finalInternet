@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['json'])) {
                 <div id="not-logged" class="empty-history" style="display:none">
                     <h4 class="fw-bold text-muted">Acceso Restringido</h4>
                     <p class="text-muted">Necesitas iniciar sesion para ver tu historial de compras.</p>
-                    <a href="login.html" class="btn btn-dark btn-lg mt-2">Iniciar Sesion</a>
+                    <a href="login.php" class="btn btn-dark btn-lg mt-2">Iniciar Sesion</a>
                 </div>
 
                 <div id="empty-history" class="empty-history" style="display:none">
@@ -164,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['json'])) {
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
         <script>
             function getUser() { return JSON.parse(localStorage.getItem('currentUser') || 'null'); }
-            function logout() { localStorage.removeItem('currentUser'); window.location.href = 'login.html'; }
+            function logout() { localStorage.removeItem('currentUser'); window.location.href = 'login.php'; }
 
             function escHtml(str) {
                 return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -259,7 +259,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['json'])) {
 
             async function reorder(idx) {
                 const user = getUser();
-                if (!user) { window.location.href = 'login.html'; return; }
+                if (!user) { window.location.href = 'login.php'; return; }
                 const order = _orders[idx];
                 for (const item of order.items) {
                     await fetch('carrito.php', {
