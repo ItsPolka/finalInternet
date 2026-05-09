@@ -49,6 +49,10 @@ try {
         .badge-admin  { background: #ffc107; color: #212529; }
         .badge-client { background: #e9ecef; color: #495057; }
         #access-denied { min-height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .edit-row td { background: #f8f9fa; vertical-align: middle; }
+        .edit-row input[type="number"] { width: 90px; }
+        .img-thumb { width: 56px; height: 42px; object-fit: cover; border-radius: 6px; }
+        .no-img-cell { display: flex; align-items: center; justify-content: center; background: #e9ecef; border-radius: 6px; width: 56px; height: 42px; font-size: 0.65rem; color: #aaa; }
     </style>
 </head>
 <body>
@@ -99,6 +103,7 @@ try {
                 <div class="alert alert-danger">Error de base de datos: <?= htmlspecialchars($dbError) ?></div>
                 <?php endif; ?>
 
+                <!-- Estadisticas -->
                 <div class="row g-4 mb-5">
                     <div class="col-6 col-md-3">
                         <div class="card stat-card p-4">
@@ -126,6 +131,7 @@ try {
                     </div>
                 </div>
 
+                <!-- Usuarios -->
                 <div class="card border-0 shadow-sm rounded-4 mb-5">
                     <div class="card-header bg-white border-0 pt-4 pb-2 px-4 d-flex align-items-center justify-content-between">
                         <h5 class="fw-bold mb-0">Usuarios registrados</h5>
@@ -166,7 +172,8 @@ try {
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm rounded-4">
+                <!-- Historial de compras -->
+                <div class="card border-0 shadow-sm rounded-4 mb-5">
                     <div class="card-header bg-white border-0 pt-4 pb-2 px-4 d-flex align-items-center justify-content-between">
                         <h5 class="fw-bold mb-0">Compras recientes</h5>
                         <span class="badge bg-secondary"><?= count($compras) ?></span>
@@ -200,7 +207,8 @@ try {
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm rounded-4 mt-5" id="seccion-productos">
+                <!-- Gestion de productos -->
+                <div class="card border-0 shadow-sm rounded-4" id="seccion-productos">
                     <div class="card-header bg-white border-0 pt-4 pb-2 px-4 d-flex align-items-center justify-content-between">
                         <h5 class="fw-bold mb-0">Gestion de productos</h5>
                         <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#modalAgregarProducto">
@@ -234,6 +242,7 @@ try {
         </section>
     </div>
 
+    <!-- Modal: Agregar Producto -->
     <div class="modal fade" id="modalAgregarProducto" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content rounded-4 border-0 shadow">
@@ -276,6 +285,7 @@ try {
         </div>
     </div>
 
+    <!-- Modal: Confirmar eliminacion -->
     <div class="modal fade" id="modalEliminar" tabindex="-1">
         <div class="modal-dialog modal-sm">
             <div class="modal-content rounded-4 border-0 shadow">
@@ -341,8 +351,68 @@ try {
     </script>
     <script>
         let productoIdAEliminar = null;
+        let productoEnEdicion   = null;
+
+        function escHtml(str) {
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        function renderFila(p) {
+            return `
+                <td class="px-4 text-muted">${p.id_producto}</td>
+                <td>
+                    ${p.imagen
+                        ? `<img src="${escHtml(p.imagen)}" class="img-thumb" alt="${escHtml(p.nombre)}">`
+                        : `<div class="no-img-cell">sin img</div>`}
+                </td>
+                <td class="fw-semibold">${escHtml(p.nombre)}</td>
+                <td>$${parseFloat(p.precio).toFixed(2)}</td>
+                <td>
+                    <span class="badge ${parseInt(p.inventario) > 0 ? 'bg-success' : 'bg-secondary'}">
+                        ${p.inventario}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <button class="btn btn-outline-primary btn-sm me-1"
+                            onclick="editarProducto(${p.id_producto}, '${escHtml(p.nombre).replace(/'/g,"\\'")}', ${p.precio}, ${p.inventario}, '${escHtml(p.imagen || '')}')">
+                        Editar
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm"
+                            onclick="pedirEliminar(${p.id_producto}, '${escHtml(p.nombre).replace(/'/g,"\\'")}')">
+                        Eliminar
+                    </button>
+                </td>
+            `;
+        }
+
+        function renderFilaEdicion(p_id, nombre, precio, inventario, imagen) {
+            return `
+                <td class="px-4 text-muted">${p_id}</td>
+                <td>
+                    ${imagen ? `<img src="${escHtml(imagen)}" class="img-thumb mb-1" alt="">` : ''}
+                    <div class="mt-1">
+                        <input type="file" class="form-control form-control-sm" id="edit-img-${p_id}"
+                               accept="image/jpeg,image/png,image/webp,image/gif" style="width:160px">
+                        <div class="form-text" style="font-size:0.7rem">Nueva imagen (opcional)</div>
+                    </div>
+                </td>
+                <td class="fw-semibold">${escHtml(nombre)}</td>
+                <td>$${parseFloat(precio).toFixed(2)}</td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" id="edit-inv-${p_id}"
+                           value="${inventario}" min="0">
+                </td>
+                <td class="text-center">
+                    <button class="btn btn-success btn-sm me-1" id="btn-save-${p_id}"
+                            onclick="guardarEdicion(${p_id})">Guardar</button>
+                    <button class="btn btn-outline-secondary btn-sm"
+                            onclick="cancelarEdicion()">Cancelar</button>
+                </td>
+            `;
+        }
 
         async function cargarProductos() {
+            productoEnEdicion = null;
             try {
                 const res   = await fetch('driver_productos.php');
                 const data  = await res.json();
@@ -351,44 +421,79 @@ try {
                     tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Sin productos en el catalogo</td></tr>';
                     return;
                 }
-                tbody.innerHTML = data.productos.map(p => `
-                    <tr>
-                        <td class="px-4 text-muted">${p.id_producto}</td>
-                        <td>
-                            ${p.imagen
-                                ? `<img src="${escHtml(p.imagen)}" alt="${escHtml(p.nombre)}" style="width:56px;height:42px;object-fit:cover;border-radius:6px;">`
-                                : `<div class="d-flex align-items-center justify-content-center bg-light rounded text-muted" style="width:56px;height:42px;font-size:0.65rem;">sin img</div>`}
-                        </td>
-                        <td class="fw-semibold">${escHtml(p.nombre)}</td>
-                        <td>$${parseFloat(p.precio).toFixed(2)}</td>
-                        <td>
-                            <span class="badge ${p.inventario > 0 ? 'bg-success' : 'bg-secondary'}">
-                                ${p.inventario}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-outline-danger btn-sm"
-                                    onclick="pedirEliminar(${p.id_producto}, '${escHtml(p.nombre).replace(/'/g,"\\'")}')">
-                                Eliminar
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
+                tbody.innerHTML = data.productos.map(p =>
+                    `<tr data-id="${p.id_producto}">${renderFila(p)}</tr>`
+                ).join('');
             } catch (e) {
                 document.getElementById('productos-tbody').innerHTML =
                     '<tr><td colspan="6" class="text-center text-danger py-3">Error al cargar productos</td></tr>';
             }
         }
 
-        function escHtml(str) {
-            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        function editarProducto(id, nombre, precio, inventario, imagen) {
+            if (productoEnEdicion && productoEnEdicion !== id) {
+                const prevRow = document.querySelector(`tr[data-id="${productoEnEdicion}"]`);
+                if (prevRow) cargarProductos();
+                return;
+            }
+            productoEnEdicion = id;
+            const row = document.querySelector(`tr[data-id="${id}"]`);
+            if (!row) return;
+            row.classList.add('edit-row');
+            row.innerHTML = renderFilaEdicion(id, nombre, precio, inventario, imagen);
+            document.getElementById(`edit-inv-${id}`).focus();
+        }
+
+        function cancelarEdicion() {
+            productoEnEdicion = null;
+            cargarProductos();
+        }
+
+        async function guardarEdicion(id) {
+            const invInput = document.getElementById(`edit-inv-${id}`);
+            const imgInput = document.getElementById(`edit-img-${id}`);
+            const btn      = document.getElementById(`btn-save-${id}`);
+
+            const inventario = invInput.value;
+            const imagenFile = imgInput ? imgInput.files[0] : null;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+            const formData = new FormData();
+            formData.append('action', 'update');
+            formData.append('id_producto', id);
+            formData.append('inventario', inventario);
+            if (imagenFile) formData.append('imagen', imagenFile);
+
+            try {
+                const res  = await fetch('driver_productos.php', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.ok) {
+                    productoEnEdicion = null;
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    if (row && data.producto) {
+                        row.classList.remove('edit-row');
+                        row.innerHTML = renderFila(data.producto);
+                    } else {
+                        cargarProductos();
+                    }
+                } else {
+                    alert(data.msg || 'Error al guardar.');
+                    btn.disabled = false;
+                    btn.textContent = 'Guardar';
+                }
+            } catch (e) {
+                alert('Error de conexion.');
+                btn.disabled = false;
+                btn.textContent = 'Guardar';
+            }
         }
 
         document.getElementById('prod-imagen').addEventListener('change', function() {
             const file = this.files[0];
             if (file) {
-                const url = URL.createObjectURL(file);
-                document.getElementById('preview-img').src = url;
+                document.getElementById('preview-img').src = URL.createObjectURL(file);
                 document.getElementById('preview-imagen').classList.remove('d-none');
             } else {
                 document.getElementById('preview-imagen').classList.add('d-none');
